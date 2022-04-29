@@ -8,6 +8,8 @@ import {
   FlatList,
   Modal,
   Image,
+  AsyncStorage,
+  ActivityIndicator,
 } from 'react-native';
 
 import {Header, Button, Left, Right, Item} from 'native-base';
@@ -17,91 +19,24 @@ import {BlurView} from '@react-native-community/blur';
 
 import {ICONS, COLORS, IMAGES, FONTS, SIZES} from '../constants';
 
-const listSaleTop = [
-  {
-    id: 1,
-    image: IMAGES.nike1,
-    bgColor: '#52237f',
-    type: 'RUNNING',
-    price: '$100',
-    name: 'Nike 1',
-    size: [40, 41, 42, 43],
-  },
-  {
-    id: 2,
-    image: IMAGES.nike2,
-    bgColor: '#40bede',
-    type: 'RUNNING',
-    price: '$100',
-    name: 'Nike 2',
-    size: [40, 41, 42, 43],
-  },
-  {
-    id: 3,
-    image: IMAGES.nike3,
-    bgColor: '#e11d7d',
-    type: 'RUNNING',
-    price: '$100',
-    name: 'Nike 3',
-    size: [40, 41, 42, 43],
-  },
-];
-
-const listAllProduct = [
-  {
-    id: 4,
-    image: IMAGES.nike4,
-    bgColor: '#52237f',
-    type: 'RUNNING',
-    price: '$100',
-    name: 'Nike 4',
-    size: [40, 41, 42, 43],
-  },
-  {
-    id: 5,
-    image: IMAGES.nike5,
-    bgColor: '#40bede',
-    type: 'RUNNING',
-    price: '$100',
-    name: 'Nike 5',
-    size: [40, 41, 42, 43],
-  },
-  {
-    id: 6,
-    image: IMAGES.nike6,
-    bgColor: '#e11d7d',
-    type: 'RUNNING',
-    price: '$100',
-    name: 'Nike 6',
-    size: [40, 41, 42, 43],
-  },
-  {
-    id: 7,
-    image: IMAGES.nike7,
-    bgColor: '#e11d7d',
-    type: 'RUNNING',
-    price: '$100',
-    name: 'Nike 7',
-    size: [40, 41, 42, 43],
-  },
-  {
-    id: 8,
-    image: IMAGES.nike8,
-    bgColor: '#e11d7d',
-    type: 'RUNNING',
-    price: '$100',
-    name: 'Nike 8',
-    size: [40, 41, 42, 43],
-  },
-];
-
 class Home extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       showModal: false,
-      setSelectItem: null,
+      isLoading: true,
     };
+  }
+
+  componentDidMount() {
+    return fetch('https://oc.rightcommand.com/index.php?route=api/app/getListProduct')
+      .then((response) => response.json())
+      .then((responseJson) => {
+        this.setState({
+          latests: responseJson.latests,
+          saleTops: responseJson.saleTops,
+        });
+      });
   }
 
   setSelectItem(item, status) {
@@ -112,7 +47,7 @@ class Home extends React.Component {
   }
 
   renderSize(items) {
-    return items.size.map((item, index) => {
+    return items.sizes[0].product_option_value.map((item, index) => {
       return (
         <TouchableOpacity
           key={index}
@@ -127,7 +62,7 @@ class Home extends React.Component {
             borderColor: COLORS.white,
             borderRadius: 5,
           }}>
-          <Text style={{color: COLORS.white}}>{index}</Text>
+          <Text style={{color: COLORS.white}}>{item.name}</Text>
         </TouchableOpacity>
       );
     });
@@ -193,7 +128,7 @@ class Home extends React.Component {
         </View>
 
         <Image
-          source={item.image}
+          source={{uri: item.image}}
           resizeMode="cover"
           style={{
             position: 'absolute',
@@ -217,7 +152,7 @@ class Home extends React.Component {
         }}>
         <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
           <Image
-            source={item.image}
+            source={{uri: item.image}}
             resizeMode="contain"
             style={{width: 130, height: 100}}
           />
@@ -262,7 +197,7 @@ class Home extends React.Component {
             horizontal
             showsHorizontalScrollIndicator={false}
             keyExtractor={item => item.id.toString()}
-            data={listSaleTop}
+            data={this.state.saleTops}
             renderItem={({item, index}) => this.renderListSaleTop(item, index)}
           />
         </View>
@@ -295,7 +230,7 @@ class Home extends React.Component {
             <FlatList
               showsHorizonalScrollIndicator={false}
               keyExtractor={item => item.id.toString()}
-              data={listAllProduct}
+              data={this.state.latests}
               renderItem={({item, index}) =>
                 this.renderListAllProduct(item, index)
               }
@@ -343,7 +278,7 @@ class Home extends React.Component {
                     marginTop: -SIZES.padding * 2,
                   }}>
                   <Image
-                    source={this.state.item.image}
+                    source={{uri: this.state.item.image}}
                     resizeMode="contain"
                     style={{
                       width: '90%',

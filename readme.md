@@ -3,3 +3,4 @@
 ```
 npx react-native run-ios
 ```
+Tutorial: https://youtu.be/-wNdVohNPCk
